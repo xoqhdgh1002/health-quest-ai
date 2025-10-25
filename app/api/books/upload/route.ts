@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getDb, saveDb, generateId } from '@/lib/db';
-import { PDFParse } from 'pdf-parse';
 
 export async function POST(request: Request) {
   try {
@@ -29,12 +28,12 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Parse PDF
+    // Parse PDF - use dynamic import to avoid build-time issues
     let pdfText = '';
     try {
-      const pdfParser = new PDFParse({ data: buffer });
-      const result = await pdfParser.getText();
-      pdfText = result.text;
+      const pdf = (await import('pdf-parse')).default;
+      const data = await pdf(buffer);
+      pdfText = data.text;
     } catch (pdfError) {
       console.error('PDF parsing error:', pdfError);
       return NextResponse.json({ error: 'Failed to parse PDF file' }, { status: 400 });
