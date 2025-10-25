@@ -62,6 +62,15 @@ export interface UserBadge {
   earnedAt: string;
 }
 
+export interface Book {
+  id: string;
+  userId: string;
+  title: string;
+  author?: string;
+  content: string;
+  uploadedAt: string;
+}
+
 export interface Database {
   users: User[];
   quests: Quest[];
@@ -70,6 +79,7 @@ export interface Database {
   levels: Level[];
   badges: Badge[];
   userBadges: UserBadge[];
+  books: Book[];
 }
 
 const defaultDb: Database = {
@@ -78,6 +88,7 @@ const defaultDb: Database = {
   streaks: [],
   xpHistory: [],
   levels: [],
+  books: [],
   badges: [
     {
       id: 'badge-1',

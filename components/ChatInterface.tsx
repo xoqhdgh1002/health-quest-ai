@@ -8,6 +8,12 @@ interface Message {
   content: string;
 }
 
+interface Book {
+  id: string;
+  title: string;
+  author?: string;
+}
+
 interface ChatInterfaceProps {
   userId: string;
 }
@@ -16,6 +22,8 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [selectedBookId, setSelectedBookId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -25,6 +33,23 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Fetch books
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await fetch(`/api/books?userId=${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setBooks(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch books:', error);
+      }
+    };
+
+    fetchBooks();
+  }, [userId]);
 
   const suggestedQuestions = [
     "방탄 커피는 어떻게 만드나요?",
@@ -60,7 +85,9 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
           messages: [...messages, userMessage].map(m => ({
             role: m.role,
             content: m.content
-          }))
+          })),
+          bookId: selectedBookId || undefined,
+          userId
         })
       });
 
@@ -105,7 +132,35 @@ export default function ChatInterface({ userId }: ChatInterfaceProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg flex flex-col h-[600px]">
+    <div className="bg-white rounded-xl shadow-lg flex flex-col h-[700px]">
+      {/* Book Selection */}
+      <div className="p-4 border-b border-gray-200">
+        <label htmlFor="book-select" className="block text-sm font-medium text-gray-700 mb-2">
+          참조할 책 선택
+        </label>
+        <select
+          id="book-select"
+          value={selectedBookId}
+          onChange={(e) => {
+            setSelectedBookId(e.target.value);
+            setMessages([]);
+          }}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="">기본 건강 도서 (요약본)</option>
+          {books.map((book) => (
+            <option key={book.id} value={book.id}>
+              {book.title}{book.author ? ` - ${book.author}` : ''}
+            </option>
+          ))}
+        </select>
+        {selectedBookId && (
+          <p className="text-xs text-blue-600 mt-1">
+            선택된 책의 전체 내용을 기반으로 답변합니다
+          </p>
+        )}
+      </div>
+
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.length === 0 && (

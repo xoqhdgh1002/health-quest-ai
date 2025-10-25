@@ -51,6 +51,12 @@ export default function Home() {
           </h1>
           <div className="flex gap-3">
             <button
+              onClick={() => router.push('/books')}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+            >
+              책 관리
+            </button>
+            <button
               onClick={() => router.push('/chat')}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
             >
