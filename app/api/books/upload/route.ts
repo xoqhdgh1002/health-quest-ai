@@ -28,11 +28,12 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Parse PDF - use dynamic import to avoid build-time issues
+    // Parse PDF using pdf-parse
     let pdfText = '';
     try {
-      const pdf = (await import('pdf-parse')).default;
-      const data = await pdf(buffer);
+      // Dynamic import to avoid build issues
+      const pdfParse = await import('pdf-parse');
+      const data = await pdfParse.default(buffer);
       pdfText = data.text;
     } catch (pdfError) {
       console.error('PDF parsing error:', pdfError);
